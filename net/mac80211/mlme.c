@@ -1321,6 +1321,26 @@ ieee80211_sta_process_chanswitch(struct ieee80211_sub_if_data *sdata,
 
 	current_band = cbss->channel->band;
 	bss = (void *)cbss->priv;
+	if (elems->wide_bw_chansw_ie) {
+		struct ieee80211_supported_band *sband = ieee80211_get_sband(sdata);
+
+		/* if wide bw is included then we are moving to HT or VHT channels,
+		 * so enable modes accordingly
+		 */
+		if (sband->ht_cap.ht_supported && (ifmgd->flags &
+				(IEEE80211_STA_DISABLE_HT | IEEE80211_STA_DISABLE_40MHZ))) {
+			ifmgd->flags &= ~(IEEE80211_STA_DISABLE_HT | IEEE80211_STA_DISABLE_40MHZ);
+			sdata_info(sdata,"mac80211: %s: updated if flags=0x%x\n",__func__, ifmgd->flags);
+		}
+
+		if ((elems->wide_bw_chansw_ie->new_channel_width > IEEE80211_VHT_CHANWIDTH_USE_HT) &&
+					sband->vht_cap.vht_supported &&
+					(ifmgd->flags & (IEEE80211_STA_DISABLE_VHT | IEEE80211_STA_DISABLE_160MHZ))) {
+			ifmgd->flags &= ~(IEEE80211_STA_DISABLE_VHT | IEEE80211_STA_DISABLE_160MHZ);
+			sdata_info(sdata,"mac80211: %s: updated vht caps, if flags=0x%x\n",__func__, ifmgd->flags);
+		}
+	}
+
 	res = ieee80211_parse_ch_switch_ie(sdata, elems, current_band,
 					   bss->vht_cap_info,
 					   ifmgd->flags,
@@ -1453,9 +1473,9 @@ ieee80211_sta_process_chanswitch(struct ieee80211_sub_if_data *sdata,
 	/* channel switch handled in software */
 	if (csa_ie.count <= 1)
 		ieee80211_queue_work(&local->hw, &ifmgd->chswitch_work);
-	else
+	else /* consider short beacons time also */
 		mod_timer(&ifmgd->chswitch_timer,
-			  TU_TO_EXP_TIME((csa_ie.count - 1) *
+			  TU_TO_EXP_TIME((csa_ie.count - 1) * sdata->vif.bss_conf.dtim_period *
 					 cbss->beacon_interval));
 	return;
  lock_and_drop_connection:

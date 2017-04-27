@@ -376,11 +376,6 @@ static void ieee80211_chan_bw_change(struct ieee80211_local *local,
 		if (new_sta_bw == sta->sta.bandwidth)
 			continue;
 
-		/* vif changed to narrow BW and narrow BW for station wasn't
-		 * requested or vise versa */
-		if ((new_sta_bw < sta->sta.bandwidth) == !narrowed)
-			continue;
-
 		sta->sta.bandwidth = new_sta_bw;
 		rate_control_rate_update(local, sband, sta,
 					 IEEE80211_RC_BW_CHANGED);
