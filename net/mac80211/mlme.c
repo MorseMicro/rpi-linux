@@ -1106,7 +1106,7 @@ static void ieee80211_chswitch_work(struct work_struct *work)
 		struct ieee80211_supported_band *sband = NULL;
 		struct sta_info *mgd_sta = NULL;
 		enum ieee80211_sta_rx_bandwidth bw = IEEE80211_STA_RX_BW_20;
-
+		bool update_drv_rc = false;
 		/*
 		 * with multi-vif csa driver may call ieee80211_csa_finish()
 		 * many times while waiting for other interfaces to use their
@@ -1146,8 +1146,8 @@ static void ieee80211_chswitch_work(struct work_struct *work)
 			}
 
 			mgd_sta = sta_info_get(sdata, ifmgd->bssid);
-			sband =
-				local->hw.wiphy->bands[sdata->csa_chandef.chan->band];
+			sband = local->hw.wiphy->bands[sdata->csa_chandef.chan->band];
+			update_drv_rc = true;
 		}
 
 		if (sdata->vif.bss_conf.chandef.width >
@@ -1168,7 +1168,7 @@ static void ieee80211_chswitch_work(struct work_struct *work)
 		}
 
 		if (sdata->vif.bss_conf.chandef.width <
-		    sdata->csa_chandef.width) {
+		    sdata->csa_chandef.width || update_drv_rc) {
 			mgd_sta->sta.bandwidth = bw;
 			rate_control_rate_update(local, sband, mgd_sta,
 						 IEEE80211_RC_BW_CHANGED);
@@ -1304,6 +1304,26 @@ ieee80211_sta_process_chanswitch(struct ieee80211_sub_if_data *sdata,
 		return;
 
 	current_band = cbss->channel->band;
+	if (elems->wide_bw_chansw_ie) {
+		struct ieee80211_supported_band *sband = ieee80211_get_sband(sdata);
+
+		/* if wide bw is included then we are moving to HT or VHT channels,
+		 * so enable modes accordingly
+		 */
+		if (sband->ht_cap.ht_supported && (ifmgd->flags &
+		    (IEEE80211_STA_DISABLE_HT | IEEE80211_STA_DISABLE_40MHZ))) {
+			ifmgd->flags &= ~(IEEE80211_STA_DISABLE_HT | IEEE80211_STA_DISABLE_40MHZ);
+			sdata_info(sdata,"mac80211: %s: updated if flags=0x%x\n",__func__, ifmgd->flags);
+		}
+
+		if ((elems->wide_bw_chansw_ie->new_channel_width > IEEE80211_VHT_CHANWIDTH_USE_HT) &&
+		    sband->vht_cap.vht_supported &&
+		    (ifmgd->flags & (IEEE80211_STA_DISABLE_VHT | IEEE80211_STA_DISABLE_160MHZ))) {
+			ifmgd->flags &= ~(IEEE80211_STA_DISABLE_VHT | IEEE80211_STA_DISABLE_160MHZ);
+			sdata_info(sdata,"mac80211: %s: updated vht caps, if flags=0x%x\n",__func__, ifmgd->flags);
+		}
+	}
+
 	res = ieee80211_parse_ch_switch_ie(sdata, elems, current_band,
 					   ifmgd->flags,
 					   ifmgd->associated->bssid, &csa_ie);
@@ -1424,10 +1444,10 @@ ieee80211_sta_process_chanswitch(struct ieee80211_sub_if_data *sdata,
 	/* channel switch handled in software */
 	if (csa_ie.count <= 1)
 		ieee80211_queue_work(&local->hw, &ifmgd->chswitch_work);
-	else
+	else /* consider short beacons time also */
 		mod_timer(&ifmgd->chswitch_timer,
-			  TU_TO_EXP_TIME((csa_ie.count - 1) *
-					 cbss->beacon_interval));
+			  TU_TO_EXP_TIME((csa_ie.count - 1) * sdata->vif.bss_conf.dtim_period *
+			  cbss->beacon_interval));
 	return;
  drop_connection:
 	/*
