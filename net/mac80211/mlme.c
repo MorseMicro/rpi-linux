@@ -2607,6 +2607,7 @@ ieee80211_sta_process_chanswitch(struct ieee80211_link_data *link,
 	now = jiffies;
 	link->u.mgd.csa.time = now +
 			       TU_TO_JIFFIES((max_t(int, csa_ie.count, 1) - 1) *
+					     sdata->vif.bss_conf.dtim_period *
 					     link->conf->beacon_int);
 
 	if (ieee80211_vif_link_active(&sdata->vif, link->link_id) &&
