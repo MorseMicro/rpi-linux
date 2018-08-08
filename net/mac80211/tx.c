@@ -3617,10 +3617,11 @@ void __ieee80211_subif_start_xmit(struct sk_buff *skb,
 		/* We need a bit of data queued to build aggregates properly, so
 		 * instruct the TCP stack to allow more than a single ms of data
 		 * to be queued in the stack. The value is a bit-shift of 1
-		 * second, so 7 is ~8ms of queued data. Only affects local TCP
+		 * second, so tx_sk_pacing_shift '3' set from driver has additional
+		 * ~125ms of queued data. Only affects local TCP
 		 * sockets.
 		 */
-		sk_pacing_shift_update(skb->sk, 7);
+		sk_pacing_shift_update(skb->sk, sdata->local->hw.tx_sk_pacing_shift);
 
 		fast_tx = rcu_dereference(sta->fast_tx);
 
