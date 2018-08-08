@@ -3545,6 +3545,8 @@ void __ieee80211_subif_start_xmit(struct sk_buff *skb,
 	if (!IS_ERR_OR_NULL(sta)) {
 		struct ieee80211_fast_tx *fast_tx;
 
+		sk_pacing_shift_update(skb->sk, sdata->local->hw.tx_sk_pacing_shift);
+
 		fast_tx = rcu_dereference(sta->fast_tx);
 
 		if (fast_tx &&
