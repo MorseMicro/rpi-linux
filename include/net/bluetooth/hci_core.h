@@ -291,6 +291,8 @@ struct hci_dev {
 	__u16		devid_vendor;
 	__u16		devid_product;
 	__u16		devid_version;
+	__s8		min_le_tx_power;
+	__s8		max_le_tx_power;
 
 	__u16		pkt_type;
 	__u16		esco_type;
