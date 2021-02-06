@@ -4857,6 +4857,7 @@ int ieee80211_tx_control_port(struct wiphy *wiphy, struct net_device *dev,
 {
 	struct ieee80211_sub_if_data *sdata = IEEE80211_DEV_TO_SUB_IF(dev);
 	struct ieee80211_local *local = sdata->local;
+	struct sta_info *sta;
 	struct sk_buff *skb;
 	struct ethhdr *ehdr;
 	u32 flags;
@@ -4891,6 +4892,21 @@ int ieee80211_tx_control_port(struct wiphy *wiphy, struct net_device *dev,
 	skb->protocol = htons(ETH_P_802_3);
 	skb_reset_network_header(skb);
 	skb_reset_mac_header(skb);
+
+	/* update QoS header to prioritize control port frames if possible,
+	 * priorization also happens for control port frames send over
+	 * AF_PACKET
+	 */
+	rcu_read_lock();
+
+	if (ieee80211_lookup_ra_sta(sdata, skb, &sta) == 0 && !IS_ERR(sta)) {
+		u16 queue = __ieee80211_select_queue(sdata, sta, skb);
+
+		skb_set_queue_mapping(skb, queue);
+		skb_get_hash(skb);
+	}
+
+	rcu_read_unlock();
 
 	local_bh_disable();
 	__ieee80211_subif_start_xmit(skb, skb->dev, flags);
