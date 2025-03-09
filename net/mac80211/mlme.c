@@ -4335,6 +4335,7 @@ static int ieee80211_prep_connection(struct ieee80211_sub_if_data *sdata,
 	}
 
 	if (new_sta || override) {
+		memcpy(ifmgd->bssid, cbss->bssid, ETH_ALEN);
 		err = ieee80211_prep_channel(sdata, cbss);
 		if (err) {
 			if (new_sta)
