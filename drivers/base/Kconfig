@@ -167,6 +167,7 @@ config FW_LOADER_USER_HELPER_FALLBACK
 
 config WANT_DEV_COREDUMP
 	bool
+	default y
 	help
 	  Drivers should "select" this option if they desire to use the
 	  device coredump mechanism.
