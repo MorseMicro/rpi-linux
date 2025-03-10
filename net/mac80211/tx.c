@@ -3865,7 +3865,9 @@ static void ieee80211_set_csa(struct ieee80211_sub_if_data *sdata,
 
 static u8 __ieee80211_csa_update_counter(struct beacon_data *beacon)
 {
-	beacon->csa_current_counter--;
+	/* Avoid updating once the count down is complete */
+	if (beacon->csa_current_counter > 1)
+		beacon->csa_current_counter--;
 
 	/* the counter should never reach 0 */
 	WARN_ON_ONCE(!beacon->csa_current_counter);
@@ -3986,10 +3988,15 @@ __ieee80211_beacon_get(struct ieee80211_hw *hw,
 
 	if (sdata->vif.type == NL80211_IFTYPE_AP) {
 		struct ieee80211_if_ap *ap = &sdata->u.ap;
+		bool short_beacon = (vif->bss_conf.dtim_period > 1);
+
+		if (ap->ps.dtim_count > 0)
+			short_beacon = ((ap->ps.dtim_count-1) != 0);
 
 		beacon = rcu_dereference(ap->beacon);
 		if (beacon) {
-			if (beacon->csa_counter_offsets[0]) {
+			/* Do not count channel switch count for short beacons */
+			if (beacon->csa_counter_offsets[0] && !short_beacon) {
 				if (!is_template)
 					__ieee80211_csa_update_counter(beacon);
 
