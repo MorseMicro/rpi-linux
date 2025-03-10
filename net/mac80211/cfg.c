@@ -1684,6 +1684,9 @@ static int ieee80211_add_station(struct wiphy *wiphy, struct net_device *dev,
 		sta_info_free(local, sta);
 		return err;
 	}
+	if (ieee80211_vif_is_mesh(&sdata->vif)) {
+		mesh_update_mfp_flag(sdata,sta);
+	}
 
 	/*
 	 * for TDLS and for unassociated station, rate control should be
