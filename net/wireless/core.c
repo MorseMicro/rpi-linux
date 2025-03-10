@@ -1217,8 +1217,8 @@ static int cfg80211_netdev_notifier_call(struct notifier_block *nb,
 		wdev->ps_timeout = -1;
 
 		if ((wdev->iftype == NL80211_IFTYPE_STATION ||
-		     wdev->iftype == NL80211_IFTYPE_P2P_CLIENT ||
-		     wdev->iftype == NL80211_IFTYPE_ADHOC) && !wdev->use_4addr)
+		     wdev->iftype == NL80211_IFTYPE_P2P_CLIENT) &&
+            !wdev->use_4addr)
 			dev->priv_flags |= IFF_DONT_BRIDGE;
 
 		INIT_WORK(&wdev->disconnect_wk, cfg80211_autodisconnect_wk);
