@@ -618,6 +618,7 @@ try_again:
 	 */
 	if (host->ops->init_card)
 		host->ops->init_card(host, card);
+	mmc_fixup_device(card, sdio_card_init_methods);
 
 	/*
 	 * If the host and card support UHS-I mode request the card
@@ -626,7 +627,8 @@ try_again:
 	 * systems that claim 1.8v signalling in fact do not support
 	 * it.
 	 */
-	if (!powered_resume && (rocr & ocr & R4_18V_PRESENT)) {
+	if (!powered_resume && (rocr & ocr & R4_18V_PRESENT) &&
+			!(card->quirks & MMC_QUIRK_NO_18V)) {
 		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180,
 					ocr_card);
 		if (err == -EAGAIN) {

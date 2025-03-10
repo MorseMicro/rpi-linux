@@ -281,6 +281,7 @@ struct mmc_card {
 #define MMC_QUIRK_BROKEN_IRQ_POLLING	(1<<11)	/* Polling SDIO_CCCR_INTx could create a fake interrupt */
 #define MMC_QUIRK_TRIM_BROKEN	(1<<12)		/* Skip trim */
 #define MMC_QUIRK_BROKEN_HPI	(1<<13)		/* Disable broken HPI support */
+#define MMC_QUIRK_NO_18V   (1<<14)		/* Ignore voltage negotiation and don't use 1.8v */
 
 
 #define MMC_QUIRK_ERASE_BROKEN	(1<<31)		/* Skip erase */
@@ -362,6 +363,9 @@ struct mmc_fixup {
 	/* for MMC cards */
 	unsigned int ext_csd_rev;
 
+	/* Match against functions declared in device tree */
+	const char *of_compatible;
+
 	void (*vendor_fixup)(struct mmc_card *card, int data);
 	int data;
 };
@@ -418,6 +422,22 @@ struct mmc_fixup {
 		    CID_OEMID_ANY, 0, -1ull,				\
 		   _vendor, _device,					\
 		   _fixup, _data, EXT_CSD_REV_ANY)			\
+
+#define SDIO_FIXUP_COMPATIBLE(_compatible, _fixup, _data)      \
+   {                       \
+       .name = CID_NAME_ANY,           \
+       .manfid = CID_MANFID_ANY,       \
+       .oemid = CID_OEMID_ANY,         \
+       .rev_start = 0,             \
+       .rev_end = -1ull,           \
+       .cis_vendor = SDIO_ANY_ID,      \
+       .cis_device = SDIO_ANY_ID,      \
+       .vendor_fixup = (_fixup),       \
+       .data = (_data),            \
+       .ext_csd_rev = EXT_CSD_REV_ANY,     \
+       .of_compatible = _compatible,   \
+   }
+
 
 #define cid_rev(hwrev, fwrev, year, month)	\
 	(((u64) hwrev) << 40 |                  \
@@ -541,6 +561,14 @@ static inline int mmc_card_broken_hpi(const struct mmc_card *c)
 	return c->quirks & MMC_QUIRK_BROKEN_HPI;
 }
 
+static const struct mmc_fixup __maybe_unused sdio_card_init_methods[] = {
+	SDIO_FIXUP_COMPATIBLE("morse,mm6104", add_quirk, MMC_QUIRK_NO_18V),
+
+	SDIO_FIXUP_COMPATIBLE("morse,mm610x", add_quirk, MMC_QUIRK_NO_18V),
+
+	END_FIXUP
+};
+
 #define mmc_card_name(c)	((c)->cid.prod_name)
 #define mmc_card_id(c)		(dev_name(&(c)->dev))
 
@@ -561,5 +589,7 @@ extern void mmc_unregister_driver(struct mmc_driver *);
 
 extern void mmc_fixup_device(struct mmc_card *card,
 			     const struct mmc_fixup *table);
+extern bool mmc_fixup_of_compatible_match(struct mmc_card *card,
+                                const char *compatible);
 
 #endif /* LINUX_MMC_CARD_H */
