@@ -268,6 +268,7 @@ struct mmc_card {
 #define MMC_QUIRK_BROKEN_IRQ_POLLING	(1<<11)	/* Polling SDIO_CCCR_INTx could create a fake interrupt */
 #define MMC_QUIRK_TRIM_BROKEN	(1<<12)		/* Skip trim */
 #define MMC_QUIRK_BROKEN_HPI	(1<<13)		/* Disable broken HPI support */
+#define MMC_QUIRK_NO_18V	(1<<14)		/* Ignore voltage negotiation and don't use 1.8v */
 
 #define MMC_QUIRK_ERASE_BROKEN	(1<<31)		/* Skip erase */
 
