@@ -176,6 +176,7 @@ struct sta_info;
  * @failed_bar_ssn: ssn of the last failed BAR tx attempt
  * @bar_pending: BAR needs to be re-sent
  * @amsdu: support A-MSDU withing A-MDPU
+ * @ndp: this session is using NDP block ACKs
  *
  * This structure's lifetime is managed by RCU, assignments to
  * the array holding it must hold the aggregation mutex.
@@ -204,6 +205,7 @@ struct tid_ampdu_tx {
 	u16 failed_bar_ssn;
 	bool bar_pending;
 	bool amsdu;
+	bool ndp;
 	u8 tid;
 };
 
@@ -231,6 +233,7 @@ struct tid_ampdu_tx {
  *	and ssn.
  * @removed: this session is removed (but might have been found due to RCU)
  * @started: this session has started (head ssn or higher was received)
+ * @ndp: this session is using NDP block ACKs
  *
  * This structure's lifetime is managed by RCU, assignments to
  * the array holding it must hold the aggregation mutex.
@@ -258,7 +261,8 @@ struct tid_ampdu_rx {
 	u8 tid;
 	u8 auto_seq:1,
 	   removed:1,
-	   started:1;
+	   started:1,
+	   ndp:1;
 };
 
 /**
