@@ -121,6 +121,13 @@
  * via the usual ieee80211_tx_dequeue).
  */
 
+/** Morse Micro patches which add functionality that the driver needs to know about, can be
+ * signalled by adding a define here.
+ */
+
+/** mac80211 has the capability to negotiate NDP block acknowledgements */
+#define MORSE_MAC80211_S1G_FEATURE_NDP_BLOCKACK
+
 struct device;
 
 /**
@@ -2127,6 +2134,9 @@ struct ieee80211_txq {
  * @IEEE80211_HW_DOESNT_SUPPORT_QOS_NDP: The driver (or firmware) doesn't
  *	support QoS NDP for AP probing - that's most likely a driver bug.
  *
+ * @IEEE80211_HW_SUPPORTS_NDP_BLOCKACK: Hardware supports 11ah A-MPDU aggregation with NDP block
+ *	ACKs
+ *
  * @NUM_IEEE80211_HW_FLAGS: number of hardware flags, used for sizing arrays
  */
 enum ieee80211_hw_flags {
@@ -2172,6 +2182,7 @@ enum ieee80211_hw_flags {
 	IEEE80211_HW_SUPPORTS_TDLS_BUFFER_STA,
 	IEEE80211_HW_DEAUTH_NEED_MGD_TX_PREP,
 	IEEE80211_HW_DOESNT_SUPPORT_QOS_NDP,
+	IEEE80211_HW_SUPPORTS_NDP_BLOCKACK,
 
 	/* keep last, obviously */
 	NUM_IEEE80211_HW_FLAGS
@@ -2947,6 +2958,7 @@ enum ieee80211_ampdu_mlme_action {
  *	%IEEE80211_AMPDU_TX_OPERATIONAL
  * @amsdu: indicates the peer's ability to receive A-MSDU within A-MPDU.
  *	valid when the action is set to %IEEE80211_AMPDU_TX_OPERATIONAL
+ * @ndp: indicates the driver has requested the session to use NDP block ACKs
  * @timeout: BA session timeout. Valid only when the action is set to
  *	%IEEE80211_AMPDU_RX_START
  */
@@ -2957,6 +2969,7 @@ struct ieee80211_ampdu_params {
 	u16 ssn;
 	u16 buf_size;
 	bool amsdu;
+	bool ndp;
 	u16 timeout;
 };
 
