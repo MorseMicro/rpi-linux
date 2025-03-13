@@ -1494,14 +1494,13 @@ static void bcm2835_mmc_remove(struct platform_device *pdev)
 	u32 scratch;
 
 	dead = 0;
+	spin_lock_irqsave(&host->lock, flags);
 	scratch = bcm2835_mmc_readl(host, SDHCI_INT_STATUS);
 	if (scratch == (u32)-1)
 		dead = 1;
 
 
 	if (dead) {
-		spin_lock_irqsave(&host->lock, flags);
-
 		host->flags |= SDHCI_DEVICE_DEAD;
 
 		if (host->mrq) {
@@ -1511,10 +1510,9 @@ static void bcm2835_mmc_remove(struct platform_device *pdev)
 			host->mrq->cmd->error = -ENOMEDIUM;
 			tasklet_schedule(&host->finish_tasklet);
 		}
-
-		spin_unlock_irqrestore(&host->lock, flags);
 	}
 
+	spin_unlock_irqrestore(&host->lock, flags);
 	mmc_remove_host(host->mmc);
 
 	if (!dead)
