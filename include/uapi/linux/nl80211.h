@@ -3867,6 +3867,12 @@ enum nl80211_mesh_power_mode {
  *	remove it from the STA's list of peers. You may set this to 0 to disable
  *	the removal of the STA. Default is 30 minutes.
  *
+ * @NL80211_MESHCONF_NOLEARN: Try to avoid multi-hop path discovery (e.g.
+ *      PREQ/PREP for HWMP) if the destination is a direct neighbor. Note that
+ *      this might not be the optimal decision as a multi-hop route might be
+ *      better. So if using this setting you will likely also want to disable
+ *      dot11MeshForwarding and use another mesh routing protocol on top.
+ *
  * @__NL80211_MESHCONF_ATTR_AFTER_LAST: internal use
  */
 enum nl80211_meshconf_params {
@@ -3899,6 +3905,7 @@ enum nl80211_meshconf_params {
 	NL80211_MESHCONF_POWER_MODE,
 	NL80211_MESHCONF_AWAKE_WINDOW,
 	NL80211_MESHCONF_PLINK_TIMEOUT,
+	NL80211_MESHCONF_NOLEARN,
 
 	/* keep last */
 	__NL80211_MESHCONF_ATTR_AFTER_LAST,

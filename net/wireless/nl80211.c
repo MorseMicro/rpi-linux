@@ -6127,7 +6127,9 @@ static int nl80211_get_mesh_config(struct sk_buff *skb,
 	    nla_put_u16(msg, NL80211_MESHCONF_AWAKE_WINDOW,
 			cur_params.dot11MeshAwakeWindowDuration) ||
 	    nla_put_u32(msg, NL80211_MESHCONF_PLINK_TIMEOUT,
-			cur_params.plink_timeout))
+			cur_params.plink_timeout) ||
+		nla_put_u8(msg, NL80211_MESHCONF_NOLEARN,
+			cur_params.dot11MeshNolearn))
 		goto nla_put_failure;
 	nla_nest_end(msg, pinfoattr);
 	genlmsg_end(msg, hdr);
@@ -6168,6 +6170,7 @@ static const struct nla_policy nl80211_meshconf_params_policy[NL80211_MESHCONF_A
 	[NL80211_MESHCONF_POWER_MODE] = { .type = NLA_U32 },
 	[NL80211_MESHCONF_AWAKE_WINDOW] = { .type = NLA_U16 },
 	[NL80211_MESHCONF_PLINK_TIMEOUT] = { .type = NLA_U32 },
+	[NL80211_MESHCONF_NOLEARN] = {.type = NLA_U8 },
 };
 
 static const struct nla_policy
@@ -6379,6 +6382,8 @@ do {									    \
 	FILL_IN_MESH_PARAM_IF_SET(tb, cfg, plink_timeout, 0, 0xffffffff,
 				  mask, NL80211_MESHCONF_PLINK_TIMEOUT,
 				  nl80211_check_u32);
+	FILL_IN_MESH_PARAM_IF_SET(tb, cfg, dot11MeshNolearn, 0, 1,
+				  mask, NL80211_MESHCONF_NOLEARN, nl80211_check_bool);
 	if (mask_out)
 		*mask_out = mask;
 
