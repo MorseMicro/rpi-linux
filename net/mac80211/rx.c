@@ -2941,19 +2941,13 @@ ieee80211_rx_mesh_data(struct ieee80211_sub_if_data *sdata, struct sta_info *sta
 		memcpy(fwd_hdr->addr2, sdata->vif.addr, ETH_ALEN);
 		/* update power mode indication when forwarding */
 		ieee80211_mps_set_frame_flags(sdata, NULL, fwd_hdr);
-	} else if (!mesh_nexthop_lookup(sdata, fwd_skb)) {
+	}
+	else if (!mesh_nexthop_resolve(sdata, fwd_skb)) {
 		/* mesh power mode flags updated in mesh_nexthop_lookup */
 		IEEE80211_IFSTA_MESH_CTR_INC(ifmsh, fwded_unicast);
 	} else {
-		/* unable to resolve next hop */
-		if (sta)
-			mesh_path_error_tx(sdata, ifmsh->mshcfg.element_ttl,
-					   hdr.addr3, 0,
-					   WLAN_REASON_MESH_PATH_NOFORWARD,
-					   sta->sta.addr);
-		IEEE80211_IFSTA_MESH_CTR_INC(ifmsh, dropped_frames_no_route);
-		kfree_skb(fwd_skb);
-		goto rx_accept;
+		/* skb queued: don't free */
+		return RX_DROP_MONITOR;
 	}
 
 	IEEE80211_IFSTA_MESH_CTR_INC(ifmsh, fwded_frames);

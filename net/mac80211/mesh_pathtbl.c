@@ -774,6 +774,12 @@ void mesh_plink_broken(struct sta_info *sta)
 		if (rcu_access_pointer(mpath->next_hop) == sta &&
 		    mpath->flags & MESH_PATH_ACTIVE &&
 		    !(mpath->flags & MESH_PATH_FIXED)) {
+			mhwmp_dbg(sdata, "Broken path for :%pM flags:%x exp_time:%d"
+				"hops:%d metric:%d Queue_len:%d\n",
+				mpath->dst, mpath->flags,
+				jiffies_to_msecs(mpath->exp_time - jiffies),
+				mpath->hop_count, mpath->metric,
+				skb_queue_len(&mpath->frame_queue));
 			spin_lock_bh(&mpath->state_lock);
 			mpath->flags &= ~MESH_PATH_ACTIVE;
 			++mpath->sn;
