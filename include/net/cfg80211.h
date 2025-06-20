@@ -97,6 +97,8 @@ struct wiphy;
  *	on this channel.
  * @IEEE80211_CHAN_NO_10MHZ: 10 MHz bandwidth is not permitted
  *	on this channel.
+ * @IEEE80211_CHAN_IGNORE: Mark this channel as disabled when
+ *	communicating channel list via nl80211.
  *
  */
 enum ieee80211_channel_flags {
@@ -113,6 +115,7 @@ enum ieee80211_channel_flags {
 	IEEE80211_CHAN_IR_CONCURRENT	= 1<<10,
 	IEEE80211_CHAN_NO_20MHZ		= 1<<11,
 	IEEE80211_CHAN_NO_10MHZ		= 1<<12,
+	IEEE80211_CHAN_IGNORE		= 1<<13,
 };
 
 #define IEEE80211_CHAN_NO_HT40 \
