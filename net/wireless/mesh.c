@@ -18,7 +18,7 @@
 #define MESH_CONF_T 		100
 #define MESH_HOLD_T 		100
 
-#define MESH_PATH_TIMEOUT	5000
+#define MESH_PATH_TIMEOUT	50000
 #define MESH_RANN_INTERVAL      5000
 #define MESH_PATH_TO_ROOT_TIMEOUT      6000
 #define MESH_ROOT_INTERVAL     5000
@@ -31,22 +31,22 @@
  */
 #define MESH_PREQ_MIN_INT	10
 #define MESH_PERR_MIN_INT	100
-#define MESH_DIAM_TRAVERSAL_TIME 50
+#define MESH_DIAM_TRAVERSAL_TIME 200
 
-#define MESH_RSSI_THRESHOLD	0
+#define MESH_RSSI_THRESHOLD	-85
 
 /*
  * A path will be refreshed if it is used PATH_REFRESH_TIME milliseconds
  * before timing out.  This way it will remain ACTIVE and no data frames
  * will be unnecessarily held in the pending queue.
  */
-#define MESH_PATH_REFRESH_TIME			1000
+#define MESH_PATH_REFRESH_TIME			10000
 #define MESH_MIN_DISCOVERY_TIMEOUT (2 * MESH_DIAM_TRAVERSAL_TIME)
 
 /* Default maximum number of established plinks per interface */
 #define MESH_MAX_ESTAB_PLINKS	32
 
-#define MESH_MAX_PREQ_RETRIES	4
+#define MESH_MAX_PREQ_RETRIES	6
 
 #define MESH_SYNC_NEIGHBOR_OFFSET_MAX 50
 
@@ -82,7 +82,7 @@ const struct mesh_config default_mesh_config = {
 	.power_mode = NL80211_MESH_POWER_ACTIVE,
 	.dot11MeshAwakeWindowDuration = MESH_DEFAULT_AWAKE_WINDOW,
 	.plink_timeout = MESH_DEFAULT_PLINK_TIMEOUT,
-	.dot11MeshNolearn = false,
+	.dot11MeshNolearn = true,
 };
 
 const struct mesh_setup default_mesh_setup = {

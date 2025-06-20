@@ -229,7 +229,13 @@ struct mesh_rmc {
 #define MESH_MAX_MPATHS		1024
 
 /* Number of frames buffered per destination for unresolved destinations */
-#define MESH_FRAME_QUEUE_LEN	10
+#define MESH_FRAME_QUEUE_LEN	50
+
+/* Best metric for single hop HaLow link */
+#define BEST_SINGLE_HOP_METRIC_HALOW  253
+
+/* Max path discovery timeout in msecs */
+#define MESH_MAX_MPATH_DISCOVERY_TIMEOUT      2000
 
 /* Public interfaces */
 /* Various */
