@@ -106,6 +106,8 @@ struct wiphy;
  *	on this channel.
  * @IEEE80211_CHAN_16MHZ: 16 MHz bandwidth is permitted
  *	on this channel.
+ * @IEEE80211_CHAN_IGNORE: Mark this channel as disabled when
+ *	communicating channel list via nl80211.
  *
  */
 enum ieee80211_channel_flags {
@@ -128,6 +130,7 @@ enum ieee80211_channel_flags {
 	IEEE80211_CHAN_4MHZ		= 1<<16,
 	IEEE80211_CHAN_8MHZ		= 1<<17,
 	IEEE80211_CHAN_16MHZ		= 1<<18,
+	IEEE80211_CHAN_IGNORE		= 1<<19,
 };
 
 #define IEEE80211_CHAN_NO_HT40 \
