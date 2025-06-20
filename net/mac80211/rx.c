@@ -2559,17 +2559,12 @@ ieee80211_rx_h_mesh_fwding(struct ieee80211_rx_data *rx)
 		memcpy(fwd_hdr->addr2, sdata->vif.addr, ETH_ALEN);
 		/* update power mode indication when forwarding */
 		ieee80211_mps_set_frame_flags(sdata, NULL, fwd_hdr);
-	} else if (!mesh_nexthop_lookup(sdata, fwd_skb)) {
+	}
+	else if (!mesh_nexthop_resolve(sdata, fwd_skb)) {
 		/* mesh power mode flags updated in mesh_nexthop_lookup */
 		IEEE80211_IFSTA_MESH_CTR_INC(ifmsh, fwded_unicast);
 	} else {
-		/* unable to resolve next hop */
-		mesh_path_error_tx(sdata, ifmsh->mshcfg.element_ttl,
-				   fwd_hdr->addr3, 0,
-				   WLAN_REASON_MESH_PATH_NOFORWARD,
-				   fwd_hdr->addr2);
-		IEEE80211_IFSTA_MESH_CTR_INC(ifmsh, dropped_frames_no_route);
-		kfree_skb(fwd_skb);
+		/* skb queued: don't free */
 		return RX_DROP_MONITOR;
 	}
 
