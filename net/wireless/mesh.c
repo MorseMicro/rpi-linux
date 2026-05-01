@@ -29,7 +29,7 @@
 #define MESH_PERR_MIN_INT	100
 #define MESH_DIAM_TRAVERSAL_TIME 200
 
-#define MESH_RSSI_THRESHOLD	-85
+#define MESH_RSSI_THRESHOLD	-80
 
 /*
  * A path will be refreshed if it is used PATH_REFRESH_TIME milliseconds
@@ -78,7 +78,7 @@ const struct mesh_config default_mesh_config = {
 	.power_mode = NL80211_MESH_POWER_ACTIVE,
 	.dot11MeshAwakeWindowDuration = MESH_DEFAULT_AWAKE_WINDOW,
 	.plink_timeout = MESH_DEFAULT_PLINK_TIMEOUT,
-	.dot11MeshNolearn = true,
+	.dot11MeshNolearn = false,
 };
 
 const struct mesh_setup default_mesh_setup = {
