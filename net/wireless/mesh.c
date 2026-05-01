@@ -28,7 +28,7 @@
 #define MESH_PERR_MIN_INT	100
 #define MESH_DIAM_TRAVERSAL_TIME 200
 
-#define MESH_RSSI_THRESHOLD	-85
+#define MESH_RSSI_THRESHOLD	-80
 
 /*
  * A path will be refreshed if it is used PATH_REFRESH_TIME milliseconds
