@@ -41,7 +41,7 @@
 /* Default maximum number of established plinks per interface */
 #define MESH_MAX_ESTAB_PLINKS	32
 
-#define MESH_MAX_PREQ_RETRIES	6
+#define MESH_MAX_PREQ_RETRIES	4
 
 #define MESH_SYNC_NEIGHBOR_OFFSET_MAX 50
 
