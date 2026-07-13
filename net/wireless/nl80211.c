@@ -12114,7 +12114,8 @@ static int nl80211_probe_client(struct sk_buff *skb,
 	int err;
 
 	if (wdev->iftype != NL80211_IFTYPE_AP &&
-	    wdev->iftype != NL80211_IFTYPE_P2P_GO)
+	    wdev->iftype != NL80211_IFTYPE_P2P_GO &&
+	    wdev->iftype != NL80211_IFTYPE_MESH_POINT)
 		return -EOPNOTSUPP;
 
 	if (!info->attrs[NL80211_ATTR_MAC])
