@@ -1344,7 +1344,7 @@ void mesh_path_refresh(struct ieee80211_sub_if_data *sdata,
 	   (!addr || ether_addr_equal(sdata->vif.addr, addr)))
 		mesh_queue_preq(mpath, PREQ_Q_F_START | PREQ_Q_F_REFRESH);
 
-	if (hwmp_is_mpath_optimal(mpath)) {
+	if (hwmp_is_mpath_optimal(mpath) && mpath->hop_count == 1) {
 		/* Refresh path, if path is being actively used & optimal */
 		unsigned long exp_time =
 			msecs_to_jiffies(sdata->u.mesh.mshcfg.dot11MeshHWMPactivePathTimeout);
@@ -1410,13 +1410,28 @@ void mesh_path_timer(struct timer_list *t)
 		mpath->flags &= ~(MESH_PATH_RESOLVING | MESH_PATH_RESOLVED);
 		spin_unlock_bh(&mpath->state_lock);
 	} else if (mpath->discovery_retries < max_preq_retries(sdata)) {
-		++mpath->discovery_retries;
-		mpath->discovery_timeout = min(mpath->discovery_timeout * 2,
-			msecs_to_jiffies(MESH_MAX_MPATH_DISCOVERY_TIMEOUT));
-		mpath->flags &= ~MESH_PATH_REQ_QUEUED;
-		spin_unlock_bh(&mpath->state_lock);
-		mesh_queue_preq(mpath, PREQ_Q_F_REFRESH);
-	} else {
+        mpath->discovery_retries++;
+        /* Fast fallback to gate */
+        if (!mpath->is_gate && mesh_gate_num(sdata) > 0 &&
+            mpath->discovery_retries >= max_preq_retries(sdata) / 2) {
+            mpath->flags &= ~(MESH_PATH_RESOLVING |
+                            MESH_PATH_RESOLVED |
+                            MESH_PATH_REQ_QUEUED);
+            mpath->exp_time = jiffies;
+            spin_unlock_bh(&mpath->state_lock);
+
+            ret = mesh_path_send_to_gates(mpath);
+            if (ret)
+                mhwmp_dbg(sdata, "Fast fallback: no gate was reachable\n");
+            return;
+        }
+        /* Continue retrying PREQ */
+        mpath->discovery_timeout = min(mpath->discovery_timeout * 2,
+                            msecs_to_jiffies(MESH_MAX_MPATH_DISCOVERY_TIMEOUT));
+        mpath->flags &= ~MESH_PATH_REQ_QUEUED;
+        spin_unlock_bh(&mpath->state_lock);
+        mesh_queue_preq(mpath, PREQ_Q_F_REFRESH);
+    } else {
 		mpath->flags &= ~(MESH_PATH_RESOLVING |
 				  MESH_PATH_RESOLVED |
 				  MESH_PATH_REQ_QUEUED);
